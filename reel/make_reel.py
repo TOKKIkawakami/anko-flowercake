@@ -109,9 +109,9 @@ def background(t):
     return base
 
 
-def brand(base, d):
+def brand(base, d, label="あんフラワーケーキの道具"):
     # 上部ブランド表記（IGのUIを避けて少し下げる）
-    d.text((W / 2, 170), "TOKKI  |  あんフラワーケーキの道具", font=font(34),
+    d.text((W / 2, 170), f"TOKKI  |  {label}", font=font(34),
            fill=ANKO, anchor="mm")
 
 

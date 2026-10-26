@@ -5,7 +5,7 @@
 """
 import math
 
-from make_reel import (ANKO, ASSETS, CARD103, CARD104, PINK, ROOT, W, WHITE,
+from make_reel import (ANKO, ASSETS, PINK, ROOT, W, WHITE,
                        brand, card, ease_back, ease_out, paste, pill, render, text)
 
 OUT = ROOT / "reel" / "tokki_practice_anko_reel.mp4"
@@ -27,7 +27,7 @@ def scene_hook(base, d, t):
 
 
 def scene_price(base, d, t):
-    brand(base, d)
+    brand(base, d, "練習用あんこ 特価")
     s = ease_back(t / 0.5)
     if s > 0:
         paste(base, CARD_ANKO, 300, 760, scale=0.6 + 0.4 * s, alpha=min(1, s))
@@ -48,7 +48,7 @@ def scene_price(base, d, t):
 
 
 def scene_why(base, d, t):
-    brand(base, d)
+    brand(base, d, "練習用あんこ 特価")
     a = ease_out(t / 0.4)
     text(d, (W / 2, 620), "なぜこの価格？", 80, ANKO, alpha=a, base=base)
     a2 = ease_out((t - 0.5) / 0.4)
@@ -63,24 +63,6 @@ def scene_why(base, d, t):
     a4 = ease_out((t - 1.7) / 0.4)
     if a4 > 0:
         text(d, (W / 2, 1290), "失敗を気にせず、絞り放題", 54, ANKO, alpha=a4, base=base)
-
-
-def scene_set(base, d, t):
-    brand(base, d)
-    a = ease_out(t / 0.4)
-    text(d, (W / 2, 420), "口金も一緒にどうぞ", 76, ANKO, alpha=a, base=base)
-    for i, c in enumerate((CARD103, CARD104)):
-        s = ease_back((t - 0.3 - i * 0.25) / 0.5)
-        if s > 0:
-            paste(base, c, W / 2, 680 + i * 380, scale=0.55 * (0.7 + 0.3 * s), alpha=min(1, s))
-    a2 = ease_out((t - 0.9) / 0.4)
-    if a2 > 0:
-        text(d, (W / 2, 1300), "Wilton #103・#104 セット", 50, PINK, alpha=a2, base=base)
-    a3 = ease_back((t - 1.4) / 0.45)
-    if a3 > 0:
-        pill(base, W / 2, 1440, 860 * min(1, a3), 150, ANKO)
-        if a3 > 0.6:
-            text(d, (W / 2, 1440), "一緒なら送料1回分", 66, WHITE)
 
 
 def scene_cta(base, d, t):
@@ -109,7 +91,6 @@ SCENES = [
     (2.6, scene_hook),
     (3.8, scene_price),
     (3.2, scene_why),
-    (3.2, scene_set),
     (3.4, scene_cta),
 ]
 
