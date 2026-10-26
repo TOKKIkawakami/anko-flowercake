@@ -212,20 +212,22 @@ SCENES = [
 FADE = 0.25  # シーン切り替えのフェード秒数
 
 
-def render():
-    total = sum(s[0] for s in SCENES)
+def render(scenes=None, out=None):
+    scenes = scenes or SCENES
+    out = out or OUT
+    total = sum(s[0] for s in scenes)
     n = int(total * FPS)
     ff = subprocess.Popen(
         ["ffmpeg", "-y", "-loglevel", "error",
          "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
          "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
          "-shortest", "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-         "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", str(OUT)],
+         "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", str(out)],
         stdin=subprocess.PIPE)
     for f in range(n):
         g = f / FPS
         start = 0.0
-        for dur, fn in SCENES:
+        for dur, fn in scenes:
             if g < start + dur:
                 break
             start += dur
@@ -235,7 +237,7 @@ def render():
         fn(base, d, t)
         # 前後フェード（白へ）
         fade = 0.0
-        if t > dur - FADE and fn is not SCENES[-1][1]:
+        if t > dur - FADE and fn is not scenes[-1][1]:
             fade = (t - (dur - FADE)) / FADE
         elif t < FADE and start > 0:
             fade = 1 - t / FADE
@@ -244,7 +246,7 @@ def render():
         ff.stdin.write(base.convert("RGB").tobytes())
     ff.stdin.close()
     ff.wait()
-    print(f"wrote {OUT} ({total:.1f}s, {n} frames)")
+    print(f"wrote {out} ({total:.1f}s, {n} frames)")
 
 
 if __name__ == "__main__":
