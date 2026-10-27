@@ -5,11 +5,36 @@
 """
 import math
 
-from make_reel import (ANKO, ASSETS, PINK, ROOT, W, WHITE,
+from PIL import Image, ImageDraw
+
+from make_reel import (ANKO, ASSETS, H, ROOT, W, WHITE,
                        brand, card, ease_back, ease_out, paste, pill, render, text)
 
 OUT = ROOT / "reel" / "tokki_practice_anko_reel.mp4"
 CARD_ANKO = card(ASSETS / "chunseol_5kg.png", (430, 640), radius=40)
+
+# 口金リール（ピンクの花びら）と区別するため、あんこの袋に合わせたベージュ×水玉
+BG_ANKO = (246, 236, 216)
+DOT = (255, 250, 240)
+BAND = (120, 74, 50)
+PINK = (196, 122, 32)  # この動画のアクセント色（黄土色）
+
+
+def background_anko(t):
+    base = Image.new("RGBA", (W, H), BG_ANKO + (255,))
+    d = ImageDraw.Draw(base)
+    step = 120
+    shift = (t * 20) % step
+    for row in range(-1, H // step + 2):
+        off = step / 2 if row % 2 else 0
+        y = row * step + shift
+        for col in range(-1, W // step + 2):
+            x = col * step + off
+            d.ellipse((x - 16, y - 16, x + 16, y + 16), fill=DOT + (255,))
+    # 上下の帯
+    d.rectangle((0, 0, W, 36), fill=BAND + (255,))
+    d.rectangle((0, H - 36, W, H), fill=BAND + (255,))
+    return base
 
 
 def scene_hook(base, d, t):
@@ -95,4 +120,4 @@ SCENES = [
 ]
 
 if __name__ == "__main__":
-    render(SCENES, OUT)
+    render(SCENES, OUT, bg_fn=background_anko, fade_color=BG_ANKO)

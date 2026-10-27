@@ -212,7 +212,9 @@ SCENES = [
 FADE = 0.25  # シーン切り替えのフェード秒数
 
 
-def render(scenes=None, out=None):
+def render(scenes=None, out=None, bg_fn=None, fade_color=None):
+    bg_fn = bg_fn or background
+    fade_color = fade_color or BG
     scenes = scenes or SCENES
     out = out or OUT
     total = sum(s[0] for s in scenes)
@@ -232,7 +234,7 @@ def render(scenes=None, out=None):
                 break
             start += dur
         t = g - start
-        base = background(g)
+        base = bg_fn(g)
         d = ImageDraw.Draw(base)
         fn(base, d, t)
         # 前後フェード（白へ）
@@ -242,7 +244,7 @@ def render(scenes=None, out=None):
         elif t < FADE and start > 0:
             fade = 1 - t / FADE
         if fade > 0:
-            base = Image.blend(base, Image.new("RGBA", (W, H), BG + (255,)), min(1, fade) * 0.9)
+            base = Image.blend(base, Image.new("RGBA", (W, H), fade_color + (255,)), min(1, fade) * 0.9)
         ff.stdin.write(base.convert("RGB").tobytes())
     ff.stdin.close()
     ff.wait()
