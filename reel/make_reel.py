@@ -13,7 +13,8 @@ ASSETS = ROOT / "assets"
 OUT = ROOT / "reel" / "tokki_tools_reel.mp4"
 
 W, H, FPS = 1080, 1920, 30
-FONT = "/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf"
+# Noto Sans JP（可変ウェイト・OFL）。本物の太字を使い、画数の多い字がつぶれないようにする
+FONT = ASSETS / "fonts" / "NotoSansJP.ttf"
 
 # あんこ×桜ピンクの配色
 BG = (253, 244, 240)
@@ -25,10 +26,13 @@ WHITE = (255, 255, 255)
 _font_cache = {}
 
 
-def font(size):
-    if size not in _font_cache:
-        _font_cache[size] = ImageFont.truetype(FONT, size)
-    return _font_cache[size]
+def font(size, weight=500):
+    key = (size, weight)
+    if key not in _font_cache:
+        f = ImageFont.truetype(str(FONT), size)
+        f.set_variation_by_axes([weight])
+        _font_cache[key] = f
+    return _font_cache[key]
 
 
 def ease_out(t):
@@ -43,15 +47,13 @@ def ease_back(t):
 
 
 def text(draw, xy, s, size, fill, anchor="mm", bold=True, alpha=1.0, base=None):
-    """太字はストロークで表現。alpha<1のときは別レイヤーに描いて合成する。"""
-    sw = max(1, size // 28) if bold else 0
+    """alpha<1のときは別レイヤーに描いて合成する。"""
+    f = font(size, 800 if bold else 500)
     if alpha >= 0.999:
-        draw.text(xy, s, font=font(size), fill=fill, anchor=anchor,
-                  stroke_width=sw, stroke_fill=fill)
+        draw.text(xy, s, font=f, fill=fill, anchor=anchor)
         return
     layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
-    ImageDraw.Draw(layer).text(xy, s, font=font(size), fill=fill + (255,), anchor=anchor,
-                               stroke_width=sw, stroke_fill=fill + (255,))
+    ImageDraw.Draw(layer).text(xy, s, font=f, fill=fill + (255,), anchor=anchor)
     a = layer.getchannel("A").point(lambda v: int(v * alpha))
     layer.putalpha(a)
     base.alpha_composite(layer)
