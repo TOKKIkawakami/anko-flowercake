@@ -67,14 +67,22 @@ def pill(base, cx, cy, w, h, color, alpha=1.0):
     base.alpha_composite(layer)
 
 
-def card(img_path, size, radius=48):
-    """白背景の商品写真を角丸カード＋影にする。"""
+def card(img_path, size, radius=48, fit=False):
+    """商品写真を角丸カード＋影にする。fit=Trueなら切り抜かず全体を収める（余白は写真の地の色）。"""
     im = Image.open(img_path).convert("RGB")
     cw, ch = size
-    scale = max(cw / im.width, ch / im.height)
-    im = im.resize((int(im.width * scale), int(im.height * scale)), Image.LANCZOS)
-    left, top = (im.width - cw) // 2, (im.height - ch) // 2
-    im = im.crop((left, top, left + cw, top + ch))
+    if fit:
+        bgc = im.getpixel((2, 2))
+        scale = min(cw / im.width, ch / im.height) * 0.9
+        im = im.resize((int(im.width * scale), int(im.height * scale)), Image.LANCZOS)
+        canvas = Image.new("RGB", (cw, ch), bgc)
+        canvas.paste(im, ((cw - im.width) // 2, (ch - im.height) // 2))
+        im = canvas
+    else:
+        scale = max(cw / im.width, ch / im.height)
+        im = im.resize((int(im.width * scale), int(im.height * scale)), Image.LANCZOS)
+        left, top = (im.width - cw) // 2, (im.height - ch) // 2
+        im = im.crop((left, top, left + cw, top + ch))
     mask = Image.new("L", (cw, ch), 0)
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, cw, ch), radius=radius, fill=255)
     pad = 60
